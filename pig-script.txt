@@ -1,0 +1,9 @@
+bigrams = LOAD 'hdfs://localhost:8020/googlebooks-eng-all-2gram-20120701-na' AS (bigram:chararray, year:int, count:int, books:int);
+
+groupped = GROUP bigrams BY bigram;
+average = FOREACH groupped GENERATE group AS bigram, SUM(bigrams.count) / (DOUBLE)SUM(bigrams.books) as average;
+
+sorted = ORDER average BY average DESC, bigram ASC;
+top = LIMIT sorted 10;
+
+STORE top INTO 'hdfs://localhost:8020/output-na' using PigStorage('\t');
